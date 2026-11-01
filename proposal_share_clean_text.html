@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f4e9e6">
+<title>A Little Letter for You 💌</title>
+<style>
+:root{--paper:#fffdf9;--pink:#f3e8e5;--coral:#cf604d;--green:#b9d2b4;--ink:#292725;--muted:#827d78}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 15%,#fffaf7,#f2e6e3 65%,#e9d9d6);color:var(--ink);font-family:Arial,sans-serif;padding:28px 14px;display:flex;justify-content:center;align-items:center}
+main{width:min(100%,560px);position:relative}
+.brand{display:table;margin:0 auto 10px;padding:9px 17px;border:1px solid #cdb2ac;border-radius:30px;color:#b45f54;background:#fff9f6;font-size:11px;letter-spacing:1.8px;font-weight:800}
+.music-toggle{display:block;margin:0 auto 14px;padding:8px 13px;border:1px solid #dfc9c3;border-radius:22px;background:#fffaf7;color:#a65c51;font-size:12px;font-weight:700}
+.music-toggle[aria-pressed="true"]{background:#e4eee0;color:#49624b;border-color:#c5d7bf}
+.card{position:relative;overflow:hidden;background:rgba(255,253,249,.9);border:1px solid #fff;border-radius:25px;padding:clamp(25px,6vw,42px);box-shadow:0 20px 70px #75564e1c;min-height:500px}
+.screen{display:none;animation:fade .35s ease}.screen.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.eyebrow{text-align:center;font-size:11px;letter-spacing:3px;color:#8b8580;font-weight:800;margin:0 0 15px}
+h1,h2{font-family:Georgia,serif;font-weight:400;text-align:center;letter-spacing:-1.8px}
+h1{font-size:clamp(43px,10vw,64px);line-height:.98;margin:0 0 14px}
+h1 em,.accent{color:var(--coral);font-style:italic}
+h2{font-size:clamp(36px,8vw,48px);line-height:1.04;margin:8px 0 14px}
+.sub{text-align:center;color:var(--muted);font-size:14px;margin:0}
+.flower{display:block;width:170px;height:150px;margin:16px auto 8px}
+.counter{position:absolute;right:20px;top:17px;border:1px solid #e6d6d1;background:#fff8f5;color:#b36b61;border-radius:22px;padding:7px 12px;font-size:12px;font-weight:700}
+.actions{height:112px;position:relative;margin-top:17px}
+button{font:inherit;cursor:pointer;border:0}
+.yes{position:absolute;left:0;top:0;width:78%;height:62px;background:var(--green);color:#263b2b;border-radius:16px;font-size:25px;font-weight:900;box-shadow:0 5px 0 #9fbea0;transition:transform .15s}
+.yes:hover{transform:translateY(-2px)}
+.no{position:absolute;right:0;top:8px;background:#fff9f6;border:1px solid #ead9d4;color:#b96054;border-radius:12px;padding:11px 14px;font-weight:800;font-size:13px;z-index:2}
+.hint{text-align:center;color:#a69b95;font-size:13px;min-height:20px;margin-top:10px}
+.note{text-align:center;color:#a49b95;font-size:12px;margin-top:20px}
+.pill{display:inline-block;border:1px solid #e0d1cc;border-radius:25px;padding:8px 13px;color:#716b66;background:#fffaf7;font-size:12px;font-weight:700}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:24px 0 20px}
+label{display:block;font-size:11px;letter-spacing:1.5px;font-weight:800;color:#827a74;margin-bottom:8px}
+input{width:100%;padding:13px 12px;border:1px solid #d9cbc6;border-radius:13px;background:#fffdfa;color:#35312e;font:inherit;min-width:0;min-height:48px;cursor:pointer;color-scheme:light}input[type="date"],input[type="time"]{-webkit-appearance:auto;appearance:auto}
+.plan-title{text-align:center;color:#827a74;font-size:11px;letter-spacing:2px;font-weight:800;margin:8px 0 13px}
+.choices{display:flex;flex-wrap:wrap;justify-content:center;gap:9px}
+.choice{border:1px solid #cfcfc0;border-radius:24px;background:#e5eee1;color:#46564a;padding:10px 14px;font-size:14px;font-weight:700}
+.choice.selected{background:var(--coral);border-color:var(--coral);color:white}
+.primary{display:block;margin:25px auto 0;background:var(--coral);color:white;padding:15px 22px;border-radius:14px;font-weight:800;box-shadow:0 5px 12px #b95e4e22}
+.primary:disabled{opacity:.45;cursor:not-allowed}
+.letter{font:17px/1.75 Georgia,serif;color:#49443f;white-space:pre-line;margin:22px 0 24px}
+.letter .salutation{font-size:20px}
+.share{display:block;margin:0 auto;background:#cf503d;color:white;padding:16px 24px;border-radius:15px;font-weight:800;font-size:16px;box-shadow:0 7px 18px #b74d3d25}
+.secondary{display:block;margin:15px auto 0;background:transparent;color:#a85d53;text-decoration:underline;padding:8px}
+.celebrate{text-align:center;font-size:48px;margin:10px 0}
+.foot{text-align:center;color:#aa9d97;font-size:11px;margin-top:18px}
+.petal{position:fixed;top:-20px;width:9px;height:14px;border-radius:60% 40% 60% 40%;animation:fall 4s linear forwards;pointer-events:none;z-index:10}
+@keyframes fall{to{transform:translateY(110vh) rotate(680deg);opacity:.8}}
+@media(max-width:430px){.card{padding:27px 19px;min-height:490px}.fields{grid-template-columns:1fr}.yes{width:74%}h1{font-size:47px}}
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">✿ A LITTLE SOMETHING FOR YOU</div>
+  <button class="music-toggle" id="musicToggle" aria-pressed="false">♫ Play silly background music</button>
+  <section class="card">
+    <section class="screen active" id="ask">
+      <div class="counter" id="counter">0 dodges</div>
+      <p class="eyebrow">A TINY ASK</p>
+      <h1>Will you go<br><em>out</em> with me?</h1>
+      <p class="sub" id="tagline">Faster than romance.</p>
+      <svg class="flower" viewBox="0 0 180 160" aria-label="A delicate pink flower">
+        <path d="M91 91 Q91 124 92 151" fill="none" stroke="#778b6d" stroke-width="2"/>
+        <path d="M92 132 Q112 108 132 122 Q117 143 92 132" fill="#b8cbb0" stroke="#91a88a"/>
+        <g fill="#f1c9c1" stroke="#c99c94" stroke-width="1.2">
+          <ellipse cx="91" cy="43" rx="16" ry="37"/>
+          <ellipse cx="91" cy="43" rx="16" ry="37" transform="rotate(72 91 78)"/>
+          <ellipse cx="91" cy="43" rx="16" ry="37" transform="rotate(144 91 78)"/>
+          <ellipse cx="91" cy="43" rx="16" ry="37" transform="rotate(216 91 78)"/>
+          <ellipse cx="91" cy="43" rx="16" ry="37" transform="rotate(288 91 78)"/>
+        </g><circle cx="91" cy="78" r="10" fill="#d58b7d"/>
+      </svg>
+      <div class="actions" id="actions">
+        <button class="yes" id="yes">YES</button>
+        <button class="no" id="no">NO</button>
+      </div>
+      <p class="hint" id="hint">Catch No if you can. 😉</p>
+      <p class="note">A little courage looks good on you.</p>
+    </section>
+
+    <section class="screen" id="dateConfirmed">
+      <p class="eyebrow">DATE CONFIRMED</p>
+      <h1 style="font-size:clamp(42px,10vw,62px)">Yay — it's a <em>date.</em></h1>
+      <svg class="flower" viewBox="0 0 180 160" aria-label="A delicate pink flower">
+        <path d="M91 91 Q91 124 92 151" fill="none" stroke="#778b6d" stroke-width="2"/>
+        <path d="M92 132 Q112 108 132 122 Q117 143 92 132" fill="#b8cbb0" stroke="#91a88a"/>
+        <g fill="#f1c9c1" stroke="#c99c94" stroke-width="1.2">
+          <ellipse cx="91" cy="43" rx="16" ry="37"/>
+          <ellipse cx="91" cy="43" rx="16" ry="37" transform="rotate(72 91 78)"/>
+          <ellipse cx="91" cy="43" rx="16" ry="37" transform="rotate(144 91 78)"/>
+          <ellipse cx="91" cy="43" rx="16" ry="37" transform="rotate(216 91 78)"/>
+          <ellipse cx="91" cy="43" rx="16" ry="37" transform="rotate(288 91 78)"/>
+        </g><circle cx="91" cy="78" r="10" fill="#d58b7d"/>
+      </svg>
+      <p class="sub" style="font-size:16px;margin:8px 0 24px">I knew you had great taste 😎</p>
+      <button class="share" id="planNow">Now let's plan it → 🗓️</button>
+    </section>
+
+    <section class="screen" id="planner">
+      <p class="eyebrow">LET'S MAKE IT OFFICIAL</p>
+      <h2>Pick the <em>day, time</em><br>&amp; plan</h2>
+      <div class="fields">
+        <div><label for="date">WHICH DAY?</label><input id="date" type="date" required aria-label="Choose your date"></div>
+        <div><label for="time">WHAT TIME?</label><input id="time" type="time" required aria-label="Choose your time"></div>
+      </div>
+      <p class="plan-title">THE PLAN</p>
+      <div class="choices" id="choices">
+        <button class="choice" data-plan="Coffee">☕ Coffee</button>
+        <button class="choice" data-plan="A movie">🎬 A movie</button>
+        <button class="choice" data-plan="Dinner">🍝 Dinner</button>
+        <button class="choice" data-plan="Walk in the park">🌳 Walk in the park</button>
+        <button class="choice" data-plan="Drinks">🥂 Drinks</button>
+        <button class="choice" data-plan="Surprise me">🎁 Surprise me</button>
+      </div>
+      <button class="primary" id="seal" disabled>Pick day, time &amp; plan ✍️</button>
+      <p class="note" id="plannerHint" aria-live="polite">Choose a date, a time, and one plan to continue.</p>
+    </section>
+
+    <section class="screen" id="letterScreen">
+      <p class="eyebrow">A LITTLE LETTER FOR YOU</p>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap" id="details"></div>
+      <div class="letter" id="letter"></div>
+      <button class="share" id="share">Share the good news 🎉</button>
+      <button class="secondary" id="edit">Edit our plan ↶</button>
+    </section>
+
+    <section class="screen" id="declined">
+      <div class="celebrate">🌷</div>
+      <p class="eyebrow">THANK YOU FOR BEING HONEST</p>
+      <h2>No pressure.<br><em>All good.</em></h2>
+      <p class="sub">Thanks for hearing me out. Your answer is respected. 💗</p>
+      <button class="secondary" id="restart">Back to the beginning</button>
+    </section>
+  </section>
+  <div class="foot">Made with a little courage &amp; a lot of heart ♡</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let dodgeCount=0, chosenPlan='';
+const dodgeWords=[
+  "Think again!",
+  "Wait!",
+  "Sure?",
+  "You can't catch me!",
+  "Nice try. hehe",
+  "Think again!",
+  "Last chance!"
+];
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active')}
+function dodge(){
+  boing();
+  dodgeCount++;
+  const word=dodgeWords[(dodgeCount-1)%dodgeWords.length];
+  $('counter').textContent=`${dodgeCount} dodges`;
+  $('no').textContent=word;
+  $('hint').textContent=word;
+  const area=$('actions').getBoundingClientRect(), b=$('no').getBoundingClientRect();
+  const maxX=Math.max(0,area.width-b.width),maxY=Math.max(0,area.height-b.height);
+  // Relocate to a new position, keeping the button inside its play area.
+  let x=Math.random()*maxX, y=Math.random()*maxY;
+  if(maxX>30 && Math.abs(x-parseFloat($('no').style.left||'0'))<25) x=(x+maxX/2)%maxX;
+  $('no').style.left=x+'px';
+  $('no').style.top=y+'px';
+  $('no').style.right='auto';
+}
+$('no').addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')dodge()});
+$('no').addEventListener('pointerdown',e=>{e.preventDefault();dodge()});
+$('no').addEventListener('touchstart',e=>{e.preventDefault();dodge()},{passive:false});
+$('no').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();dodge()});
+$('yes').addEventListener('click',()=>{show('dateConfirmed');confetti();});
+$('planNow').addEventListener('click',()=>show('planner'));
+document.querySelectorAll('.choice').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('.choice').forEach(x=>x.classList.remove('selected'));
+  btn.classList.add('selected');chosenPlan=btn.dataset.plan;validate();
+}));
+// Use both input and change events because native date/time controls vary by browser.
+function validate(){
+  const hasDate=Boolean($('date').value);
+  const hasTime=Boolean($('time').value);
+  const ready=hasDate&&hasTime&&Boolean(chosenPlan);
+  $('seal').disabled=!ready;
+  $('plannerHint').textContent=ready
+    ? 'Lovely choice. Seal the plan when you are ready. 💗'
+    : `Still needed: ${[!hasDate?'date':null,!hasTime?'time':null,!chosenPlan?'an activity':null].filter(Boolean).join(', ')}.`;
+}
+['input','change','blur'].forEach(evt=>{
+  $('date').addEventListener(evt,validate);
+  $('time').addEventListener(evt,validate);
+});
+// Open the browser's native calendar and clock pickers when the fields are tapped.
+['date','time'].forEach(id=>{
+  $(id).addEventListener('click',()=>{
+    if(typeof $(id).showPicker==='function'){
+      try{$(id).showPicker()}catch(e){/* Browser may already have opened the native picker. */}
+    }
+  });
+});
+$('seal').addEventListener('click',()=>{
+  validate();
+  if($('seal').disabled)return;
+  // Parse date components locally to avoid UTC/time-zone date shifts.
+  const [year,month,dayNum]=$('date').value.split('-').map(Number);
+  const d=new Date(year,month-1,dayNum);
+  const day=d.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric',year:'numeric'});
+  const [hours,minutes]=$('time').value.split(':').map(Number);
+  const time=new Date(2000,0,1,hours,minutes).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+  $('details').innerHTML=`<span class="pill">📅 ${day}</span><span class="pill">⏰ ${time}</span><span class="pill">✨ ${chosenPlan}</span>`;
+  $('letter').textContent=`Dear you,\n\nSo… it's official. It's a date! 💌\n\nLet's meet ${day} at ${time}, for ${chosenPlan.toLowerCase()}.\n\nI promise good vibes, terrible jokes, and my very best self.\n\nI already can't stop smiling. See you there.\n\nYours (a little nervously),\n— Me 💗`;
+  show('letterScreen');confetti();
+});
+function confetti(){for(let i=0;i<48;i++){const p=document.createElement('i');p.className='petal';p.style.left=Math.random()*100+'vw';p.style.background=['#e6a096','#e8cb8c','#b7cdb0','#d8b4c7'][i%4];p.style.animationDelay=Math.random()*.8+'s';document.body.appendChild(p);setTimeout(()=>p.remove(),4500)}}
+$('share').addEventListener('click',async()=>{
+  const shareTitle = "It's a date!";
+  // Build a clean share copy without emoji glyphs. This avoids replacement
+  // characters (�) in apps or share sheets with broken emoji handling.
+  const cleanLetter = $('letter').textContent
+    .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '')
+    .replace(/\uFFFD/g, '')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+  const shareText = shareTitle + "\n\n" + cleanLetter;
+  const shareUrl = "https://wa.me/?text=" + encodeURIComponent(shareText);
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: shareTitle, text: shareText });
+      return;
+    } catch (err) {
+      if (err && err.name === "AbortError") return;
+    }
+  }
+
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(shareText);
+    }
+  } catch (err) {}
+  window.open(shareUrl, "_blank", "noopener,noreferrer");
+  $('share').textContent = "Opening WhatsApp…";
+});
+$('edit').addEventListener('click',()=>show('planner'));
+$('restart').addEventListener('click',()=>{dodgeCount=0;$('counter').textContent='0 dodges';$('no').textContent='NO';$('no').style.cssText='';$('hint').textContent='Catch No if you can. 😉';show('ask')});
+// Set the earliest selectable day using the device's local calendar date.
+const now=new Date();
+const localToday=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
+$('date').min=localToday;
+
+validate();
+
+// Original playful mini soundtrack made with Web Audio (no copyrighted song/audio file).
+let audioCtx=null, musicOn=false, musicTimer=null, noteIndex=0;
+const melody=[659.25,783.99,987.77,783.99,698.46,880,1046.5,880,587.33,698.46,880,698.46,659.25,783.99,987.77,1174.66];
+function audioReady(){
+  const AC=window.AudioContext||window.webkitAudioContext;
+  if(!AC)return null;
+  if(!audioCtx)audioCtx=new AC();
+  if(audioCtx.state==='suspended')audioCtx.resume();
+  return audioCtx;
+}
+function pluck(freq,when,duration=.18,type='triangle',volume=.045){
+  const ctx=audioReady();if(!ctx)return;
+  const osc=ctx.createOscillator(),gain=ctx.createGain();
+  osc.type=type;osc.frequency.setValueAtTime(freq,when);
+  gain.gain.setValueAtTime(.0001,when);
+  gain.gain.exponentialRampToValueAtTime(volume,when+.018);
+  gain.gain.exponentialRampToValueAtTime(.0001,when+duration);
+  osc.connect(gain);gain.connect(ctx.destination);
+  osc.start(when);osc.stop(when+duration+.03);
+}
+function musicStep(){
+  if(!musicOn)return;
+  const ctx=audioReady();if(!ctx)return;
+  const now=ctx.currentTime;
+  const f=melody[noteIndex%melody.length];
+  pluck(f,now,.22,'triangle',.027);
+  if(noteIndex%4===0)pluck(f/2,now,.32,'sine',.018);
+  noteIndex++;
+}
+function toggleMusic(){
+  const ctx=audioReady();if(!ctx)return;
+  musicOn=!musicOn;
+  $('musicToggle').textContent=musicOn?'♫ Music is playing — pause':'♫ Play silly background music';
+  $('musicToggle').setAttribute('aria-pressed',String(musicOn));
+  if(musicTimer){clearInterval(musicTimer);musicTimer=null;}
+  if(musicOn){noteIndex=0;musicStep();musicTimer=setInterval(musicStep,260);}
+}
+function boing(){
+  const ctx=audioReady();if(!ctx)return;
+  const now=ctx.currentTime,osc=ctx.createOscillator(),gain=ctx.createGain();
+  osc.type='sine';osc.frequency.setValueAtTime(420,now);osc.frequency.exponentialRampToValueAtTime(125,now+.19);
+  gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.12,now+.012);gain.gain.exponentialRampToValueAtTime(.0001,now+.22);
+  osc.connect(gain);gain.connect(ctx.destination);osc.start(now);osc.stop(now+.24);
+}
+$('musicToggle').addEventListener('click',toggleMusic);
+
+</script>
+</body>
+</html>
