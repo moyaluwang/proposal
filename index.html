@@ -55,7 +55,7 @@ input{width:100%;padding:13px 12px;border:1px solid #d9cbc6;border-radius:13px;b
 <body>
 <main>
   <div class="brand">✿ A LITTLE SOMETHING FOR YOU</div>
-  <button class="music-toggle" id="musicToggle" aria-pressed="false">♫ Play silly background music</button>
+  <button class="music-toggle" id="musicToggle" aria-pressed="false">♫ Music is ready — tap anywhere</button>
   <section class="card">
     <section class="screen active" id="ask">
       <div class="counter" id="counter">0 dodges</div>
@@ -215,7 +215,7 @@ function confetti(){for(let i=0;i<48;i++){const p=document.createElement('i');p.
 $('share').addEventListener('click',async()=>{
   const shareTitle = "It's a date!";
   // Build a clean share copy without emoji glyphs. This avoids replacement
-  // characters (�) in apps or share sheets with broken emoji handling.
+  // characters ( ) in apps or share sheets with broken emoji handling.
   const cleanLetter = $('letter').textContent
     .replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '')
     .replace(/\uFFFD/g, '')
@@ -252,12 +252,25 @@ $('date').min=localToday;
 validate();
 
 // Original playful mini soundtrack made with Web Audio (no copyrighted song/audio file).
-let audioCtx=null, musicOn=false, musicTimer=null, noteIndex=0;
+let audioCtx=null, masterGain=null, musicOn=false, musicTimer=null, noteIndex=0;
 const melody=[659.25,783.99,987.77,783.99,698.46,880,1046.5,880,587.33,698.46,880,698.46,659.25,783.99,987.77,1174.66];
 function audioReady(){
   const AC=window.AudioContext||window.webkitAudioContext;
   if(!AC)return null;
-  if(!audioCtx)audioCtx=new AC();
+  if(!audioCtx){
+    audioCtx=new AC();
+    // A compressor keeps the louder mobile mix clear instead of letting notes clip.
+    const compressor=audioCtx.createDynamicsCompressor();
+    compressor.threshold.setValueAtTime(-18,audioCtx.currentTime);
+    compressor.knee.setValueAtTime(18,audioCtx.currentTime);
+    compressor.ratio.setValueAtTime(4,audioCtx.currentTime);
+    compressor.attack.setValueAtTime(.004,audioCtx.currentTime);
+    compressor.release.setValueAtTime(.18,audioCtx.currentTime);
+    masterGain=audioCtx.createGain();
+    masterGain.gain.setValueAtTime(1.35,audioCtx.currentTime);
+    masterGain.connect(compressor);
+    compressor.connect(audioCtx.destination);
+  }
   if(audioCtx.state==='suspended')audioCtx.resume();
   return audioCtx;
 }
@@ -268,7 +281,7 @@ function pluck(freq,when,duration=.18,type='triangle',volume=.045){
   gain.gain.setValueAtTime(.0001,when);
   gain.gain.exponentialRampToValueAtTime(volume,when+.018);
   gain.gain.exponentialRampToValueAtTime(.0001,when+duration);
-  osc.connect(gain);gain.connect(ctx.destination);
+  osc.connect(gain);gain.connect(masterGain||ctx.destination);
   osc.start(when);osc.stop(when+duration+.03);
 }
 function musicStep(){
@@ -276,26 +289,62 @@ function musicStep(){
   const ctx=audioReady();if(!ctx)return;
   const now=ctx.currentTime;
   const f=melody[noteIndex%melody.length];
-  pluck(f,now,.22,'triangle',.027);
-  if(noteIndex%4===0)pluck(f/2,now,.32,'sine',.018);
+  pluck(f,now,.22,'triangle',.075);
+  if(noteIndex%4===0)pluck(f/2,now,.32,'sine',.042);
   noteIndex++;
 }
-function toggleMusic(){
+function startMusic(){
   const ctx=audioReady();if(!ctx)return;
-  musicOn=!musicOn;
-  $('musicToggle').textContent=musicOn?'♫ Music is playing — pause':'♫ Play silly background music';
-  $('musicToggle').setAttribute('aria-pressed',String(musicOn));
-  if(musicTimer){clearInterval(musicTimer);musicTimer=null;}
-  if(musicOn){noteIndex=0;musicStep();musicTimer=setInterval(musicStep,260);}
+  if(ctx.state==='suspended')ctx.resume();
+  if(musicOn)return;
+  musicOn=true;
+  $('musicToggle').textContent='♫ Music is playing — pause';
+  $('musicToggle').setAttribute('aria-pressed','true');
+  if(musicTimer)clearInterval(musicTimer);
+  noteIndex=0;musicStep();musicTimer=setInterval(musicStep,260);
+}
+function toggleMusic(){
+  if(musicOn){
+    musicOn=false;
+    if(musicTimer){clearInterval(musicTimer);musicTimer=null;}
+    $('musicToggle').textContent='♫ Play silly background music';
+    $('musicToggle').setAttribute('aria-pressed','false');
+  }else{
+    startMusic();
+  }
 }
 function boing(){
   const ctx=audioReady();if(!ctx)return;
   const now=ctx.currentTime,osc=ctx.createOscillator(),gain=ctx.createGain();
   osc.type='sine';osc.frequency.setValueAtTime(420,now);osc.frequency.exponentialRampToValueAtTime(125,now+.19);
-  gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.12,now+.012);gain.gain.exponentialRampToValueAtTime(.0001,now+.22);
-  osc.connect(gain);gain.connect(ctx.destination);osc.start(now);osc.stop(now+.24);
+  gain.gain.setValueAtTime(.0001,now);gain.gain.exponentialRampToValueAtTime(.20,now+.012);gain.gain.exponentialRampToValueAtTime(.0001,now+.22);
+  osc.connect(gain);gain.connect(masterGain||ctx.destination);osc.start(now);osc.stop(now+.24);
 }
 $('musicToggle').addEventListener('click',toggleMusic);
+
+// Try autoplay when the page opens. Browsers may block this until a user gesture.
+function tryAutoplay(){
+  const ctx=audioReady();
+  if(!ctx)return;
+  if(ctx.state==='running')startMusic();
+  else ctx.resume().then(()=>{
+    if(ctx.state==='running')startMusic();
+  }).catch(()=>{});
+}
+window.addEventListener('load',tryAutoplay,{once:true});
+
+// If autoplay is blocked, the first tap/click anywhere starts the soundtrack.
+// Exclude the music control itself so its tap can still pause/resume music.
+function startOnFirstInteraction(event){
+  if(event.target && event.target.closest && event.target.closest('#musicToggle'))return;
+  startMusic();
+  document.removeEventListener('pointerdown',startOnFirstInteraction,true);
+  document.removeEventListener('touchstart',startOnFirstInteraction,true);
+  document.removeEventListener('keydown',startOnFirstInteraction,true);
+}
+document.addEventListener('pointerdown',startOnFirstInteraction,true);
+document.addEventListener('touchstart',startOnFirstInteraction,{capture:true,passive:true});
+document.addEventListener('keydown',startOnFirstInteraction,true);
 
 </script>
 </body>
